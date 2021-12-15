@@ -1,40 +1,47 @@
+// Задание 1 очередность: 1, 5, 6, 2, 3, 4
+
 const moment = require("moment");
 const EventEmitter = require('events');
 const emitter = new EventEmitter();
 
-//npm start for 03-03-03-2022 or node timers.js (date)
+//npm start or node timers.js (dates)
 
 const dates = process.argv.slice(2);
+let timers = [];
 
-let date = dates[0];
+const createTimer = (date) => {
+    date = date.split('-');
 
-date = date.split('-');
+    let timerTime = new Date(date[3], date[2] - 1, date[1], date[0]);
 
-let timerTime = new Date(date[3], date[2] - 1, date[1], date[0]);
+    if (isNaN(timerTime)) {
+        console.log('Error! Wrong format');
+        return;
+    }
 
-if (isNaN(timerTime)) {
-    console.log('Error! Not a date format');
-    return;
+    if (timerTime < new Date().getTime()) {
+        console.log('Error! Wrong date');
+        return;
+    }
+
+    timers.push(timerTime);
 }
 
-flag = true;
-
-if (timerTime < currentTime) {
-    console.log('Error! Wrong date');
-    return;
+for (let i = 0; i < dates.length; i++) {
+    createTimer(dates[i]);
 }
 
-const run = async () => {
+const timerWork = (timerTime) => {
+    let flag = false;
     setInterval(function () {
-        if (flag) {
+        if (!flag) {
             let currentTime = new Date().getTime();
             let diffTime = timerTime - currentTime;
             let duration = moment.duration(diffTime, 'milliseconds');
             let payload = `${duration._data.years} years, ${duration._data.months} months, ${duration._data.days} days, ${duration._data.hours} hours, ${duration._data.minutes} minutes, ${duration._data.seconds} seconds`;
-            timerTime = moment(timerTime).add(-1, 'seconds')
             if (duration <= 0) {
                 payload = `Timer ended`;
-                flag = false;
+                flag = true;
             }
             else {
                 emitter.emit('timerTick', payload);
@@ -44,6 +51,13 @@ const run = async () => {
             return;
         }
     }, 1000)
+}
+
+const run = () => {
+    let currentTime = new Date().getTime();
+    for (let i = 0; i < timers.length; i++) {
+        timerWork(timers[i]);
+    }
 }
 
 class TimerHandler {

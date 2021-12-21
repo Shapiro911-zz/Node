@@ -4,7 +4,7 @@
   "description": "package.json",
   "main": "index.js",
   "scripts": {
-    "start": "node L3/index.js",
+    "start": "node L4/index.js",
     "test": "npm run test"
   },
   "author": "",
@@ -13,6 +13,8 @@
     "colors": "^1.4.0"
   },
   "devDependencies": {
-    "moment": "^2.29.1"
+    "inquirer": "^8.2.0",
+    "moment": "^2.29.1",
+    "yargs": "^17.3.0"
   }
 }

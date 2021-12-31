@@ -1,56 +1,35 @@
-const fs = require('fs/promises');
-const { lstatSync } = require('fs');
-const inquirer = require('inquirer');
-const yargs = require('yargs');
 const path = require('path');
+const http = require('http');
+const fs = require('fs');
 
-//npm start or node L4/index.js --substring <string>
+//npm start or node L4/index.js
 
 let executionDir = process.cwd();
 
-const options = yargs
-    .options('d', {
-        describe: 'Path to the directory',
-        alias: 'dir',
-        default: process.cwd(),
-    })
-    .options('s', {
-        alias: 'substring',
-        default: '',
-    }).argv;
-console.log(options);
-
-const isDir = (path) => lstatSync(path).isDirectory();
+const isDir = (path) => fs.lstatSync(path).isDirectory();
 
 const run = async () => {
-    const list = await fs.readdir(executionDir);
-    let chosenPath;
-    await inquirer.prompt([
-        {
-            name: 'fileName',
-            type: 'list',
-            message: 'Choose category: ',
-            choices: list,
-        }
-    ]).then(({ fileName }) => {
-        chosenPath = path.join(executionDir, fileName);
-    });
+    const server = http.createServer((req, res) => {
+        const chosenPath = path.join(process.cwd(), req.url);
+        let categories = '';
 
-    if (isDir(chosenPath)) {
-        executionDir = chosenPath;
-        return await run();
-    }
-    else {
-        const data = await fs.readFile(chosenPath, 'utf-8');
-        if (!options.substring) {
-            console.log(data)
-        }
-        else {
-            const regExp = new RegExp(options.substring, 'igm');
-            console.log(data.match(regExp));
-        }
-    }
+        if (!fs.existsSync(chosenPath)) return res.end('Error: File or directory not found');
 
+        if (!isDir(chosenPath)) {
+            return fs.createReadStream(chosenPath).pipe(res);
+        }
+
+        fs.readdirSync(chosenPath).forEach(category => {
+            const categoryPath = path.join(req.url, category)
+            console.log(categoryPath)
+            categories += `<li><a href="${categoryPath}">${category}</a></li>`
+        })
+
+        const HTML = fs.readFileSync(path.join(executionDir, 'index.html'), 'utf-8').replace('categories', categories);
+        res.end(HTML)
+    })
+
+    server.listen(5555);
 }
 
 run();

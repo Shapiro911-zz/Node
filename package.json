@@ -4,12 +4,15 @@
   "description": "package.json",
   "main": "index.js",
   "scripts": {
-    "start": "node L1/index.js 50 100",
+    "start": "node L3/index.js",
     "test": "npm run test"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "colors": "^1.4.0"
+  },
+  "devDependencies": {
+    "moment": "^2.29.1"
   }
 }
